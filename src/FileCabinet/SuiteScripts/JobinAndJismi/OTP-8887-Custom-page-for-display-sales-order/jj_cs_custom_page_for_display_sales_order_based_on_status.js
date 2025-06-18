@@ -53,39 +53,37 @@ define(['N/log', 'N/url'],
 
             }
 
-            /**
-           * Function to fetch and return values entered in the form
-           * @param {Object} scriptContext
-           * @param {Record} scriptContext.currentRecord - Current form record
-           */
-
-            function getFieldChangedValue(scriptContext) {
-
-                let newRec = scriptContext.currentRecord;
-
-                let customStatus = newRec.getValue('cust_status');
-                let customCustomer = newRec.getValue('cust_customer');
-                let customSubsidiary = newRec.getValue('cust_subsidiary');
-                let customDepartment = newRec.getValue('cust_department');
-
-                let suiteletUrl = url.resolveScript({
-                    scriptId: "customscript_jj_sl_sales_order_status",
-                    deploymentId: "customdeploy_jj_sl_sales_order_status",
-                    params: {
-                        'returnStatus': customStatus,
-                        'returnCustomer': customCustomer,
-                        'returnSubsidiary': customSubsidiary,
-                        'returnDepartment': customDepartment
-                    }
-                });
-
-                window.location.href = suiteletUrl;
-
-            }
-
         }
 
+        /**
+        * Function to fetch and return values entered in the form
+        * @param {Object} scriptContext
+        * @param {Record} scriptContext.currentRecord - Current form record
+        */
 
+        function getFieldChangedValue(scriptContext) {
+
+            let newRec = scriptContext.currentRecord;
+
+            let customStatus = newRec.getValue('cust_status');
+            let customCustomer = newRec.getValue('cust_customer');
+            let customSubsidiary = newRec.getValue('cust_subsidiary');
+            let customDepartment = newRec.getValue('cust_department');
+
+            let suiteletUrl = url.resolveScript({
+                scriptId: "customscript_jj_sl_sales_order_status",
+                deploymentId: "customdeploy_jj_sl_sales_order_status",
+                params: {
+                    'returnStatus': customStatus,
+                    'returnCustomer': customCustomer,
+                    'returnSubsidiary': customSubsidiary,
+                    'returnDepartment': customDepartment
+                }
+            });
+
+            window.location.href = suiteletUrl;
+
+        }
 
         return {
             fieldChanged: fieldChanged
