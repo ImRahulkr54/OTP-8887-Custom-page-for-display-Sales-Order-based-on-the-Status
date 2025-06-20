@@ -18,8 +18,11 @@
  * 
  * Date Created : 09-Jun-2025
  * 
- * Description : This script is defined receive data from suitelet form when the field
- *               change is triggered & return the value to suitelet as parameters.
+ * Description : This script is defined to execute the function, only when field change
+ *               is triggered. After submitting Suitelet form, the script will receive
+ *               the values & send back to Suitelet as parameters, there by enhance the
+ *               interactivity & helps to dynamically update the sublist with data based
+ *               on the filters.
  * 
  * REVISION HISTORY
  * 
@@ -51,10 +54,17 @@ define(['N/log', 'N/url'],
          */
         function fieldChanged(scriptContext) {
 
-            if (scriptContext.fieldId === 'cust_status' || scriptContext.fieldId === 'cust_customer' ||
-                scriptContext.fieldId === 'cust_subsidiary' || scriptContext.fieldId === 'cust_department') {
+            try {
 
-                getFieldChangedValue(scriptContext);
+              if ( scriptContext.fieldId === "cust_status" ||  scriptContext.fieldId === "cust_customer" ||
+                   scriptContext.fieldId === "cust_subsidiary" ||  scriptContext.fieldId === "cust_department" ) {
+
+                    getFieldChangedValue(scriptContext);
+                }
+
+            } catch (error) {
+
+              log.error("error", error.message);
 
             }
 
@@ -68,25 +78,34 @@ define(['N/log', 'N/url'],
 
         function getFieldChangedValue(scriptContext) {
 
-            let newRec = scriptContext.currentRecord;
+            try {
 
-            let customStatus = newRec.getValue('cust_status');
-            let customCustomer = newRec.getValue('cust_customer');
-            let customSubsidiary = newRec.getValue('cust_subsidiary');
-            let customDepartment = newRec.getValue('cust_department');
+              let newRec = scriptContext.currentRecord;
 
-            let suiteletUrl = url.resolveScript({
+              let customStatus = newRec.getValue("cust_status");
+              let customCustomer = newRec.getValue("cust_customer");
+              let customSubsidiary = newRec.getValue("cust_subsidiary");
+              let customDepartment = newRec.getValue("cust_department");
+
+              let suiteletUrl = url.resolveScript({
                 scriptId: "customscript_jj_sl_sales_order_status",
                 deploymentId: "customdeploy_jj_sl_sales_order_status",
                 params: {
-                    'returnStatus': customStatus,
-                    'returnCustomer': customCustomer,
-                    'returnSubsidiary': customSubsidiary,
-                    'returnDepartment': customDepartment
-                }
-            });
+                  returnStatus: customStatus,
+                  returnCustomer: customCustomer,
+                  returnSubsidiary: customSubsidiary,
+                  returnDepartment: customDepartment,
+                },
 
-            window.location.href = suiteletUrl;
+              });
+
+              window.location.href = suiteletUrl;
+
+            } catch (error) {
+
+              log.error("error", error.message);
+              
+            }
 
         }
 
