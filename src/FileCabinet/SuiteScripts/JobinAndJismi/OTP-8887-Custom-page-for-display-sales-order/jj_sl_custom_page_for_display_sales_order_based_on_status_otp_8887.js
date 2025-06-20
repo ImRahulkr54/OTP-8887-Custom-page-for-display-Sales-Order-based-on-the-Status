@@ -85,169 +85,179 @@ define(["N/log", "N/record", "N/search", "N/ui/serverWidget"], /**
 
     function filterSublist(form, scriptContext, serverWidget, search) {
 
-      let fieldGroup = form.addFieldGroup({
-        id: "fieldGroup",
-        label: "Filters",
-      });
+      try {
 
-      let statusField = form.addField({
-        id: "cust_status",
-        type: serverWidget.FieldType.SELECT,
-        label: "Status",
-        container: "fieldGroup",
-      });
-
-      statusField.addSelectOption({
-        text: "",
-        value: "",
-      });
-
-      statusField.addSelectOption({
-        text: "Pending Fulfillment",
-        value: "SalesOrd:B",
-      });
-
-      statusField.addSelectOption({
-        text: "Partially Fulfilled",
-        value: "SalesOrd:D",
-      });
-
-      statusField.addSelectOption({
-        text: "Pending Billing/Partially Fulfilled",
-        value: "SalesOrd:E",
-      });
-
-      statusField.addSelectOption({
-        text: "Pending Billing",
-        value: "SalesOrd:F",
-      });
-
-      let customerField = form.addField({
-        id: "cust_customer",
-        type: serverWidget.FieldType.SELECT,
-        label: "Customer",
-        container: "fieldGroup",
-      });
-
-      let subsidiaryField = form.addField({
-        id: "cust_subsidiary",
-        type: serverWidget.FieldType.SELECT,
-        label: "Subsidiary",
-        source: "subsidiary",
-        container: "fieldGroup",
-      });
-
-      let departmentField = form.addField({
-        id: "cust_department",
-        type: serverWidget.FieldType.SELECT,
-        label: "Department",
-        source: "department",
-        container: "fieldGroup",
-      });
-
-      let custSearch = search.create({
-        title: "Customer Search JJ",
-        id: "jj_customer_search",
-        type: search.Type.CUSTOMER,
-        filters: [["isinactive", "is", "false"]],
-        columns: ["entityid", "internalid"],
-      });
-
-      customerField.addSelectOption({
-        text: "",
-        value: "",
-      });
-
-      let runSearch = custSearch.run().each(function (result) {
-        customerField.addSelectOption({
-          value: result.getValue("internalid"),
-          text: result.getValue("entityid"),
+        let fieldGroup = form.addFieldGroup({
+          id: "fieldGroup",
+          label: "Filters",
         });
 
-        return true;
-      });
+        let statusField = form.addField({
+          id: "cust_status",
+          type: serverWidget.FieldType.SELECT,
+          label: "Status",
+          container: "fieldGroup",
+        });
 
-      let customSublist = form.addSublist({
-        id: "custpage_salesorder_sublist",
-        type: serverWidget.SublistType.LIST,
-        label: "Sales Orders",
-      });
+        statusField.addSelectOption({
+          text: "",
+          value: "",
+        });
 
-      customSublist.addField({
-        id: "internal_id",
-        label: "Internal ID",
-        type: serverWidget.FieldType.INTEGER,
-      });
+        statusField.addSelectOption({
+          text: "Pending Fulfillment",
+          value: "SalesOrd:B",
+        });
 
-      customSublist.addField({
-        id: "doc_number",
-        label: "Document No",
-        type: serverWidget.FieldType.INTEGER,
-      });
+        statusField.addSelectOption({
+          text: "Partially Fulfilled",
+          value: "SalesOrd:D",
+        });
 
-      customSublist.addField({
-        id: "doc_date",
-        label: "Date",
-        type: serverWidget.FieldType.DATE,
-      });
+        statusField.addSelectOption({
+          text: "Pending Billing/Partially Fulfilled",
+          value: "SalesOrd:E",
+        });
 
-      customSublist.addField({
-        id: "doc_status",
-        label: "Status",
-        type: serverWidget.FieldType.TEXT,
-      });
+        statusField.addSelectOption({
+          text: "Pending Billing",
+          value: "SalesOrd:F",
+        });
 
-      customSublist.addField({
-        id: "customer_name",
-        label: "Customer Name",
-        type: serverWidget.FieldType.TEXT,
-      });
+        let customerField = form.addField({
+          id: "cust_customer",
+          type: serverWidget.FieldType.SELECT,
+          label: "Customer",
+          container: "fieldGroup",
+        });
 
-      customSublist.addField({
-        id: "cust_subsidiary",
-        label: "Subsidiary",
-        type: serverWidget.FieldType.TEXT,
-      });
+        let subsidiaryField = form.addField({
+          id: "cust_subsidiary",
+          type: serverWidget.FieldType.SELECT,
+          label: "Subsidiary",
+          source: "subsidiary",
+          container: "fieldGroup",
+        });
 
-      customSublist.addField({
-        id: "cust_department",
-        label: "Department",
-        type: serverWidget.FieldType.TEXT,
-      });
+        let departmentField = form.addField({
+          id: "cust_department",
+          type: serverWidget.FieldType.SELECT,
+          label: "Department",
+          source: "department",
+          container: "fieldGroup",
+        });
 
-      customSublist.addField({
-        id: "cust_class",
-        label: "Class",
-        type: serverWidget.FieldType.TEXT,
-      });
+        let custSearch = search.create({
+          title: "Customer Search JJ",
+          id: "jj_customer_search",
+          type: search.Type.CUSTOMER,
+          filters: [["isinactive", "is", "false"]],
+          columns: ["entityid", "internalid"],
+        });
 
-      customSublist.addField({
-        id: "sub_total",
-        label: "Sub Total",
-        type: serverWidget.FieldType.CURRENCY,
-      });
+        customerField.addSelectOption({
+          text: "",
+          value: "",
+        });
 
-      customSublist.addField({
-        id: "tax_total",
-        label: "Tax Total",
-        type: serverWidget.FieldType.CURRENCY,
-      });
+        let runSearch = custSearch.run().each(function (result) {
 
-      customSublist.addField({
-        id: "grand_total",
-        label: "Grand Total",
-        type: serverWidget.FieldType.CURRENCY,
-      });
+          customerField.addSelectOption({
+            value: result.getValue("internalid"),
+            text: result.getValue("entityid"),
+          });
 
-      let newStatus = scriptContext.request.parameters.returnStatus;
-      let newCustomer = scriptContext.request.parameters.returnCustomer;
-      let newSubsidiary = scriptContext.request.parameters.returnSubsidiary;
-      let newDepartment = scriptContext.request.parameters.returnDepartment;
+          return true;
 
-      statusField.defaultValue = newStatus || "";
-      customerField.defaultValue = newCustomer || "";
-      subsidiaryField.defaultValue = newSubsidiary || "";
-      departmentField.defaultValue = newDepartment || "";
+        });
+
+        let customSublist = form.addSublist({
+          id: "custpage_salesorder_sublist",
+          type: serverWidget.SublistType.LIST,
+          label: "Sales Orders",
+        });
+
+        customSublist.addField({
+          id: "internal_id",
+          label: "Internal ID",
+          type: serverWidget.FieldType.INTEGER,
+        });
+
+        customSublist.addField({
+          id: "doc_number",
+          label: "Document No",
+          type: serverWidget.FieldType.INTEGER,
+        });
+
+        customSublist.addField({
+          id: "doc_date",
+          label: "Date",
+          type: serverWidget.FieldType.DATE,
+        });
+
+        customSublist.addField({
+          id: "doc_status",
+          label: "Status",
+          type: serverWidget.FieldType.TEXT,
+        });
+
+        customSublist.addField({
+          id: "customer_name",
+          label: "Customer Name",
+          type: serverWidget.FieldType.TEXT,
+        });
+
+        customSublist.addField({
+          id: "cust_subsidiary",
+          label: "Subsidiary",
+          type: serverWidget.FieldType.TEXT,
+        });
+
+        customSublist.addField({
+          id: "cust_department",
+          label: "Department",
+          type: serverWidget.FieldType.TEXT,
+        });
+
+        customSublist.addField({
+          id: "cust_class",
+          label: "Class",
+          type: serverWidget.FieldType.TEXT,
+        });
+
+        customSublist.addField({
+          id: "sub_total",
+          label: "Sub Total",
+          type: serverWidget.FieldType.CURRENCY,
+        });
+
+        customSublist.addField({
+          id: "tax_total",
+          label: "Tax Total",
+          type: serverWidget.FieldType.CURRENCY,
+        });
+
+        customSublist.addField({
+          id: "grand_total",
+          label: "Grand Total",
+          type: serverWidget.FieldType.CURRENCY,
+        });
+
+        let newStatus = scriptContext.request.parameters.returnStatus;
+        let newCustomer = scriptContext.request.parameters.returnCustomer;
+        let newSubsidiary = scriptContext.request.parameters.returnSubsidiary;
+        let newDepartment = scriptContext.request.parameters.returnDepartment;
+
+        statusField.defaultValue = newStatus || "";
+        customerField.defaultValue = newCustomer || "";
+        subsidiaryField.defaultValue = newSubsidiary || "";
+        departmentField.defaultValue = newDepartment || "";
+
+      } catch (error) {
+
+        log.error("error", error.message);
+
+      }
 
     }
 
@@ -259,34 +269,46 @@ define(["N/log", "N/record", "N/search", "N/ui/serverWidget"], /**
 
     function createFilterSet(scriptContext) {
 
-      let newStatus = scriptContext.request.parameters.returnStatus;
-      let newCustomer = scriptContext.request.parameters.returnCustomer;
-      let newSubsidiary = scriptContext.request.parameters.returnSubsidiary;
-      let newDepartment = scriptContext.request.parameters.returnDepartment;
+      try {
 
-      let filterSet = [["mainline", "is", "T"]];
+        let newStatus = scriptContext.request.parameters.returnStatus;
+        let newCustomer = scriptContext.request.parameters.returnCustomer;
+        let newSubsidiary = scriptContext.request.parameters.returnSubsidiary;
+        let newDepartment = scriptContext.request.parameters.returnDepartment;
 
-      if (newStatus || (newCustomer && newCustomer !== "") || newSubsidiary || newDepartment) {
+        let filterSet = [["mainline", "is", "T"]];
 
-        if (newStatus) {
-          filterSet.push("AND", ["status", "is", newStatus]);
+        if (newStatus || (newCustomer && newCustomer !== "") || newSubsidiary || newDepartment ) {
+
+          if (newStatus) {
+            filterSet.push("AND", ["status", "is", newStatus]);
+          }
+
+          if (newCustomer && newCustomer !== "") {
+            filterSet.push("AND", [
+              "customermain.internalid",
+              "anyof",
+              newCustomer,
+            ]);
+          }
+
+          if (newSubsidiary) {
+            filterSet.push("AND", ["subsidiary", "is", newSubsidiary]);
+          }
+
+          if (newDepartment) {
+            filterSet.push("AND", ["department", "is", newDepartment]);
+          }
+
         }
 
-        if (newCustomer && newCustomer !== "") {
-          filterSet.push("AND", ["customermain.internalid", "anyof", newCustomer]);
-        }
+        return filterSet;
 
-        if (newSubsidiary) {
-          filterSet.push("AND", ["subsidiary", "is", newSubsidiary]);
-        }
+      } catch (error) {
 
-        if (newDepartment) {
-          filterSet.push("AND", ["department", "is", newDepartment]);
-        }
+        log.error("error", error.message);
 
       }
-
-      return filterSet;
 
     }
 
@@ -300,111 +322,123 @@ define(["N/log", "N/record", "N/search", "N/ui/serverWidget"], /**
 
     function showResult(filterSetup, form, serverWidget, search) {
 
-      let customSublist = form.getSublist({ id: "custpage_salesorder_sublist" });
+      try {
 
-      let orderSearch = search.create({
-        title: "Filter Search JJ",
-        id: "jj_filter_search",
-        type: search.Type.SALES_ORDER,
-        filters: filterSetup,
-        columns: [
-          "internalid",
-          "tranid",
-          "trandate",
-          "status",
-          "entity",
-          "subsidiary",
-          "department",
-          "class",
-          search.createColumn({
-            name: "formulanumeric",
-            formula:
-              "NVL2({taxtotal},{fxamount} - {taxtotal}/{currency.exchangerate},{fxamount})",
-            label: "Subtotal",
-          }),
-          search.createColumn({
-            name: "formulacurrency",
-            formula: "{taxtotal}/{currency.exchangerate}",
-            label: "Taxtotal",
-          }),
-          "fxamount",
-        ],
-      });
-
-      let lineCount = 0;
-
-      let runOrderSearch = orderSearch.run().each(function (result) {
-
-        customSublist.setSublistValue({
-          id: "internal_id",
-          line: lineCount,
-          value: result.getValue("internalid") || "",
+        let customSublist = form.getSublist({
+          id: "custpage_salesorder_sublist",
         });
 
-        customSublist.setSublistValue({
-          id: "doc_number",
-          line: lineCount,
-          value: result.getValue("tranid") || "",
+        let orderSearch = search.create({
+          title: "Filter Search JJ",
+          id: "jj_filter_search",
+          type: search.Type.SALES_ORDER,
+          filters: filterSetup,
+          columns: [
+            "internalid",
+            "tranid",
+            "trandate",
+            "status",
+            "entity",
+            "subsidiary",
+            "department",
+            "class",
+            search.createColumn({
+              name: "formulanumeric",
+              formula:
+                "NVL2({taxtotal},{fxamount} - {taxtotal}/{currency.exchangerate},{fxamount})",
+              label: "Subtotal",
+            }),
+            search.createColumn({
+              name: "formulacurrency",
+              formula: "{taxtotal}/{currency.exchangerate}",
+              label: "Taxtotal",
+            }),
+            "fxamount",
+          ],
         });
 
-        customSublist.setSublistValue({
-          id: "doc_date",
-          line: lineCount,
-          value: result.getValue("trandate") || "",
+        let lineCount = 0;
+
+        let runOrderSearch = orderSearch.run().each(function (result) {
+          
+          customSublist.setSublistValue({
+            id: "internal_id",
+            line: lineCount,
+            value: result.getValue("internalid") || "",
+          });
+
+          customSublist.setSublistValue({
+            id: "doc_number",
+            line: lineCount,
+            value: result.getValue("tranid") || "",
+          });
+
+          customSublist.setSublistValue({
+            id: "doc_date",
+            line: lineCount,
+            value: result.getValue("trandate") || "",
+          });
+
+          customSublist.setSublistValue({
+            id: "doc_status",
+            line: lineCount,
+            value: result.getValue("status") || "",
+          });
+
+          customSublist.setSublistValue({
+            id: "customer_name",
+            line: lineCount,
+            value: result.getText("entity") || "",
+          });
+
+          customSublist.setSublistValue({
+            id: "cust_subsidiary",
+            line: lineCount,
+            value: result.getText("subsidiary") || "",
+          });
+
+          customSublist.setSublistValue({
+            id: "cust_department",
+            line: lineCount,
+            value: result.getText("department") || "Not Assigned",
+          });
+
+          customSublist.setSublistValue({
+            id: "cust_class",
+            line: lineCount,
+            value: result.getText("class") || "Not Assigned",
+          });
+
+          customSublist.setSublistValue({
+            id: "sub_total",
+            line: lineCount,
+            value: Number(result.getValue({ name: "formulanumeric" })).toFixed(2),
+          });
+
+          customSublist.setSublistValue({
+            id: "tax_total",
+            line: lineCount,
+            value: Number(
+              result.getValue({ name: "formulacurrency" }) || "0.00").toFixed(2),
+          });
+
+          customSublist.setSublistValue({
+            id: "grand_total",
+            line: lineCount,
+            value: result.getValue("fxamount") || "",
+          });
+
+          lineCount++;
+
+          return true;
+
         });
 
-        customSublist.setSublistValue({
-          id: "doc_status",
-          line: lineCount,
-          value: result.getValue("status") || "",
-        });
+      } catch (error) {
 
-        customSublist.setSublistValue({
-          id: "customer_name",
-          line: lineCount,
-          value: result.getText("entity") || "",
-        });
-
-        customSublist.setSublistValue({
-          id: "cust_subsidiary",
-          line: lineCount,
-          value: result.getText("subsidiary") || "",
-        });
-
-        customSublist.setSublistValue({
-          id: "cust_department",
-          line: lineCount,
-          value: result.getText("department") || "Not Assigned",
-        });
-
-        customSublist.setSublistValue({
-          id: "cust_class",
-          line: lineCount,
-          value: result.getText("class") || "Not Assigned",
-        });
-
-        customSublist.setSublistValue({
-          id: "sub_total",
-          line: lineCount,
-          value: Number(result.getValue({ name: "formulanumeric" })).toFixed(2),
-        });
-
-        customSublist.setSublistValue({
-          id: "tax_total",
-          line: lineCount,
-          value: Number(result.getValue({ name: "formulacurrency" }) || "0.00").toFixed(2),
-        });
-
-        customSublist.setSublistValue({
-          id: "grand_total",
-          line: lineCount,
-          value: result.getValue("fxamount") || "",
-        });
-
-        lineCount++;
-
-        return true;
-      });
+        log.error("error", error.message);
+        
+      }
 
     }
 
