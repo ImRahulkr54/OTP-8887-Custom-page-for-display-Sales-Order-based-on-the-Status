@@ -1,28 +1,33 @@
 /**
  * @NApiVersion 2.x
+ * 
  * @NScriptType ClientScript
+ * 
  * @NModuleScope SameAccount
  */
 
-/******************************************************************************* 
+/************************************************************************************* 
  ********* 
  * 
  * OTP-8887 : Custom page for display sales order based on the status
  * 
- *******************************************************************************
+ *************************************************************************************
  **********
  *
  * Author : Jobin and Jismi IT Services
  * 
  * Date Created : 09-Jun-2025
  * 
- * Description : This script is defined receive data from suitelet form when the field change
- *               is triggered & return the value to suitelet as parameters.
+ * Description : This script is defined receive data from suitelet form when the field
+ *               change is triggered & return the value to suitelet as parameters.
  * 
  * REVISION HISTORY
  * 
  * @version 1.0 09-Jun-2025 : Created the initial build by JJ0400
-*/
+ * 
+ * 
+***************************************************************************************
+***********/
 
 define(['N/log', 'N/url'],
     /**
