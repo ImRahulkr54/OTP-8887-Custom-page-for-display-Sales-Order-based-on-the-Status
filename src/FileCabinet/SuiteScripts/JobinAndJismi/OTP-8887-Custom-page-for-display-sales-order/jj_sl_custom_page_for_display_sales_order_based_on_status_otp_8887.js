@@ -56,13 +56,23 @@ define(["N/log", "N/record", "N/search", "N/ui/serverWidget"], /**
             title: "Sales Order",
           });
 
-          form.clientScriptFileId = 2799;
+          form.clientScriptFileId = 2809;
 
           filterSublist(form, scriptContext, serverWidget, search);
 
           let filterSetup = createFilterSet(scriptContext);
 
           showResult(filterSetup, form, serverWidget, search);
+
+          form.addSubmitButton({
+            label: "Submit",
+          });
+
+          form.addButton({
+            id : 'custpage_reset' ,
+            label: "Reset" ,
+            functionName : 'onResetFilters'
+          });
 
           scriptContext.response.writePage({ pageObject: form });
 
@@ -248,10 +258,10 @@ define(["N/log", "N/record", "N/search", "N/ui/serverWidget"], /**
         let newSubsidiary = scriptContext.request.parameters.returnSubsidiary;
         let newDepartment = scriptContext.request.parameters.returnDepartment;
 
-        statusField.defaultValue = newStatus || "";
+         statusField.defaultValue = newStatus || "";
         customerField.defaultValue = newCustomer || "";
         subsidiaryField.defaultValue = newSubsidiary || "";
-        departmentField.defaultValue = newDepartment || "";
+        departmentField.defaultValue = newDepartment || "";   
 
       } catch (error) {
 
@@ -276,9 +286,13 @@ define(["N/log", "N/record", "N/search", "N/ui/serverWidget"], /**
         let newSubsidiary = scriptContext.request.parameters.returnSubsidiary;
         let newDepartment = scriptContext.request.parameters.returnDepartment;
 
-        let filterSet = [["mainline", "is", "T"]];
+        let filterSet = [
+          ["mainline", "is", "F"],
+           "AND",
+          ["taxline","is","T"],
+        ];
 
-        if (newStatus || (newCustomer && newCustomer !== "") || newSubsidiary || newDepartment ) {
+         if (newStatus || (newCustomer && newCustomer !== "") || newSubsidiary || newDepartment ) {
 
           if (newStatus) {
             filterSet.push("AND", ["status", "is", newStatus]);
@@ -300,7 +314,7 @@ define(["N/log", "N/record", "N/search", "N/ui/serverWidget"], /**
             filterSet.push("AND", ["department", "is", newDepartment]);
           }
 
-        }
+        } 
 
         return filterSet;
 
@@ -334,67 +348,75 @@ define(["N/log", "N/record", "N/search", "N/ui/serverWidget"], /**
           type: search.Type.SALES_ORDER,
           filters: filterSetup,
           columns: [
-            "internalid",
+            search.createColumn({
+              name: "internalid",
+              sort: search.Sort.DESC,
+            }),
             "tranid",
             "trandate",
             "status",
-            "entity",
+            search.createColumn({
+              name: "entityid",
+              join: "customermain",
+              label: "Name",
+            }),
             "subsidiary",
             "department",
             "class",
             search.createColumn({
-              name: "formulanumeric",
-              formula:
-                "NVL2({taxtotal},{fxamount} - {taxtotal}/{currency.exchangerate},{fxamount})",
+              name: "formulacurrency",
+              formula: "CASE WHEN {fxamountunbilled}-{fxamount} > 0 THEN {fxamountunbilled}-{fxamount} ELSE ({totalamount}/{currency.exchangerate})-{fxamount} END",
               label: "Subtotal",
             }),
+            search.createColumn({ name: "fxamount", label: "Tax" }),
             search.createColumn({
-              name: "formulacurrency",
-              formula: "{taxtotal}/{currency.exchangerate}",
-              label: "Taxtotal",
+              name: "formulanumeric",
+              formula : "CASE WHEN {fxamountunbilled} > 0 THEN {fxamountunbilled} ELSE {totalamount}/{currency.exchangerate} END",
+              label: "Grand Total",
             }),
-            "fxamount",
           ],
         });
 
         let lineCount = 0;
 
         let runOrderSearch = orderSearch.run().each(function (result) {
+
+          log.debug('result' , result);
           
           customSublist.setSublistValue({
             id: "internal_id",
             line: lineCount,
-            value: result.getValue("internalid") || "",
+            value: result.getValue("internalid") || ' ',
           });
 
           customSublist.setSublistValue({
             id: "doc_number",
             line: lineCount,
-            value: result.getValue("tranid") || "",
+            value: result.getValue("tranid") || ' ',
           });
 
           customSublist.setSublistValue({
             id: "doc_date",
             line: lineCount,
-            value: result.getValue("trandate") || "",
+            value: result.getValue("trandate") || ' ',
           });
 
           customSublist.setSublistValue({
             id: "doc_status",
             line: lineCount,
-            value: result.getValue("status") || "",
+            value: result.getValue("status") || ' ',
           });
 
           customSublist.setSublistValue({
             id: "customer_name",
             line: lineCount,
-            value: result.getText("entity") || "",
-          });
+            value: result.getValue({ name: 'entityid', join: 'customermain' }) || ' '
+          }); 
 
           customSublist.setSublistValue({
             id: "cust_subsidiary",
             line: lineCount,
-            value: result.getText("subsidiary") || "",
+            value: result.getText("subsidiary") || ' ',
           });
 
           customSublist.setSublistValue({
@@ -412,20 +434,19 @@ define(["N/log", "N/record", "N/search", "N/ui/serverWidget"], /**
           customSublist.setSublistValue({
             id: "sub_total",
             line: lineCount,
-            value: Number(result.getValue({ name: "formulanumeric" })).toFixed(2),
+            value: Number(result.getValue({ name: "formulacurrency" })).toFixed(2),
           });
 
           customSublist.setSublistValue({
             id: "tax_total",
             line: lineCount,
-            value: Number(
-              result.getValue({ name: "formulacurrency" }) || "0.00").toFixed(2),
+            value: Number(result.getValue("fxamount") || "0.00").toFixed(2),
           });
 
           customSublist.setSublistValue({
             id: "grand_total",
             line: lineCount,
-            value: result.getValue("fxamount") || "",
+            value: Number(result.getValue("formulanumeric") || "0.00").toFixed(2),
           });
 
           lineCount++;
