@@ -288,8 +288,14 @@ define(["N/log", "N/record", "N/search", "N/ui/serverWidget"], /**
 
         let filterSet = [
           ["mainline", "is", "F"],
-           "AND",
-          ["taxline","is","T"],
+          "AND",
+          ["taxline", "is", "F"],
+          "AND",
+          ["shipping", "is", "F"],
+          "AND",
+          ["cogs", "is", "F"],
+          "AND",
+          ["item.type", "noneof", "Discount", "Subtotal"]
         ];
 
          if (newStatus || (newCustomer && newCustomer !== "") || newSubsidiary || newDepartment ) {
@@ -350,103 +356,138 @@ define(["N/log", "N/record", "N/search", "N/ui/serverWidget"], /**
           columns: [
             search.createColumn({
               name: "internalid",
-              sort: search.Sort.DESC,
+              summary: "GROUP",
+              label: "Internal ID",
             }),
-            "tranid",
-            "trandate",
-            "status",
             search.createColumn({
-              name: "entityid",
-              join: "customermain",
-              label: "Name",
+              name: "tranid",
+              summary: "GROUP",
+              label: "Document No",
+              sort: search.Sort.DESC
             }),
-            "subsidiary",
-            "department",
-            "class",
             search.createColumn({
-              name: "formulacurrency",
-              formula: "CASE WHEN {fxamountunbilled}-{fxamount} > 0 THEN {fxamountunbilled}-{fxamount} ELSE ({totalamount}/{currency.exchangerate})-{fxamount} END",
-              label: "Subtotal",
+              name: "trandate",
+              summary: "GROUP",
+              label: "Date",
             }),
-            search.createColumn({ name: "fxamount", label: "Tax" }),
             search.createColumn({
-              name: "formulanumeric",
-              formula : "CASE WHEN {fxamountunbilled} > 0 THEN {fxamountunbilled} ELSE {totalamount}/{currency.exchangerate} END",
-              label: "Grand Total",
+              name: "status",
+              summary: "GROUP",
+              label: "Status",
             }),
+            search.createColumn({
+              name: "entity",
+              summary: "GROUP",
+              label: "Customer Name",
+            }),
+            search.createColumn({
+              name: "subsidiary",
+              summary: "GROUP",
+              label: "Subsidiary",
+            }),
+            search.createColumn({
+              name: "department",
+              summary: "GROUP",
+              label: "Department",
+            }),
+            search.createColumn({
+              name: "class",
+              summary: "GROUP",
+              label: "Class",
+            }),
+            search.createColumn({
+              name: "formulacurrency1",
+              summary: "SUM",
+              formula: "{grossamount}/{currency.exchangerate}",
+              label: "subtotal",
+            }),
+            search.createColumn({
+              name: "formulacurrency2",
+              summary: "MAX",
+              formula: "NVL({taxtotal}/{currency.exchangerate}, 0)",
+              label: "tax",
+            }),
+            search.createColumn({
+              name: "formulacurrency3",
+              summary: "MAX",
+              formula: "{totalamount}/{currency.exchangerate}",
+              label: "Total",
+            }), 
           ],
         });
 
         let lineCount = 0;
 
         let runOrderSearch = orderSearch.run().each(function (result) {
-
-          log.debug('result' , result);
           
           customSublist.setSublistValue({
             id: "internal_id",
             line: lineCount,
-            value: result.getValue("internalid") || ' ',
+            value: result.getValue({ name: "internalid", summary: "GROUP" }) || ' ',
           });
 
           customSublist.setSublistValue({
             id: "doc_number",
             line: lineCount,
-            value: result.getValue("tranid") || ' ',
+            value: result.getValue({ name: "tranid", summary: "GROUP" }) || ' ',
           });
 
           customSublist.setSublistValue({
             id: "doc_date",
             line: lineCount,
-            value: result.getValue("trandate") || ' ',
+            value: result.getValue({ name: "trandate", summary: "GROUP" }) || ' ',
           });
 
           customSublist.setSublistValue({
             id: "doc_status",
             line: lineCount,
-            value: result.getValue("status") || ' ',
+            value: result.getText({ name: "status", summary: "GROUP" }) || ' ',
           });
 
           customSublist.setSublistValue({
             id: "customer_name",
             line: lineCount,
-            value: result.getValue({ name: 'entityid', join: 'customermain' }) || ' '
+            value: result.getText({ name: "entity", summary: "GROUP"}) || ' '
           }); 
 
           customSublist.setSublistValue({
             id: "cust_subsidiary",
             line: lineCount,
-            value: result.getText("subsidiary") || ' ',
+            value: result.getText({ name: "subsidiary", summary: "GROUP"}) || ' ',
           });
+
+          let depName = result.getText({ name: "department", summary: "GROUP" });
 
           customSublist.setSublistValue({
             id: "cust_department",
             line: lineCount,
-            value: result.getText("department") || "Not Assigned",
+            value: depName && depName !=="- None -" ? depName : "Not Assigned",
           });
+
+          let clsName = result.getText({ name: "class", summary: "GROUP" });
 
           customSublist.setSublistValue({
             id: "cust_class",
             line: lineCount,
-            value: result.getText("class") || "Not Assigned",
+            value: clsName && clsName !=="- None -" ? clsName : "Not Assigned",
           });
 
           customSublist.setSublistValue({
             id: "sub_total",
             line: lineCount,
-            value: Number(result.getValue({ name: "formulacurrency" })).toFixed(2),
+            value: Number(result.getValue({ name: "formulacurrency1", summary: "SUM"})).toFixed(2),
           });
 
           customSublist.setSublistValue({
             id: "tax_total",
             line: lineCount,
-            value: Number(result.getValue("fxamount") || "0.00").toFixed(2),
+            value: Number(result.getValue({ name: "formulacurrency2", summary: "MAX"}) || "0.00").toFixed(2),
           });
 
           customSublist.setSublistValue({
             id: "grand_total",
             line: lineCount,
-            value: Number(result.getValue("formulanumeric") || "0.00").toFixed(2),
+            value: Number(result.getValue({ name: "formulacurrency3", summary: "MAX"})).toFixed(2),
           });
 
           lineCount++;
